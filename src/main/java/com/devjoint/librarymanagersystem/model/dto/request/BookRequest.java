@@ -1,5 +1,6 @@
 package com.devjoint.librarymanagersystem.model.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Request object for creating or updating a book")
 public class BookRequest {
 
     @Schema(

@@ -13,12 +13,13 @@ import org.mapstruct.factory.Mappers;
 public interface BookMapper {
     BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
 
-    @Mapping(target = "author.id", source = "authorId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "author", ignore = true)
     Book toEntity(BookRequest bookRequest);
 
-    @Mapping(target = "author", source = "author")
     BookResponse toResponse(Book book);
 
-    @Mapping(target = "author.id", source = "authorId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "author", ignore = true)
     void updateEntityFromRequest(BookRequest bookRequest, @MappingTarget Book book);
 }
