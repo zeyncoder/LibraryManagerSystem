@@ -28,6 +28,10 @@ public class BookRequest {
     @NotBlank(message = "Book ISBN cannot be empty")
     private String isbn;
 
+    @Schema(
+            description = "Book price",
+            example = "45.99"
+    )
     @NotNull(message = "Book price cannot be null")
     @Positive(message = "Book price must be positive")
     private Double price;
