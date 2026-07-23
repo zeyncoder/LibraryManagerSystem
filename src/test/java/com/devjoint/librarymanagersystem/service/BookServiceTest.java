@@ -148,9 +148,16 @@ class BookServiceTest {
 
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
-        doNothing().when(bookMapper).updateEntityFromRequest(updatedBookRequest, book);
-        when(bookRepository.save(book)).thenReturn(updatedBook);
-        when(bookMapper.toResponse(updatedBook)).thenReturn(updatedBookResponse);
+        lenient().doAnswer(invocation -> {
+            Book b = invocation.getArgument(1);
+            b.setTitle(updatedBookRequest.getTitle());
+            b.setIsbn(updatedBookRequest.getIsbn());
+            b.setPrice(updatedBookRequest.getPrice());
+            b.setPublishedDate(updatedBookRequest.getPublishedDate());
+            return null;
+        }).when(bookMapper).updateEntityFromRequest(updatedBookRequest, book);
+        when(bookRepository.save(book)).thenReturn(book);
+        when(bookMapper.toResponse(book)).thenReturn(updatedBookResponse);
 
         BookResponse result = bookService.updateBook(1L, updatedBookRequest);
 

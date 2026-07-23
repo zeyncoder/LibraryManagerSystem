@@ -103,9 +103,15 @@ class MemberServiceTest {
         MemberResponse updatedMemberResponse = new MemberResponse(1L, "Alice Smith Updated", "alice.smith.updated@example.com", "111-222-3333");
 
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        doNothing().when(memberMapper).updateEntityFromRequest(updatedMemberRequest, member);
-        when(memberRepository.save(member)).thenReturn(updatedMember);
-        when(memberMapper.toResponse(updatedMember)).thenReturn(updatedMemberResponse);
+        lenient().doAnswer(invocation -> {
+            Member m = invocation.getArgument(1);
+            m.setFullName(updatedMemberRequest.getFullName());
+            m.setEmail(updatedMemberRequest.getEmail());
+            m.setPhone(updatedMemberRequest.getPhone());
+            return null;
+        }).when(memberMapper).updateEntityFromRequest(updatedMemberRequest, member);
+        when(memberRepository.save(member)).thenReturn(member);
+        when(memberMapper.toResponse(member)).thenReturn(updatedMemberResponse);
 
         MemberResponse result = memberService.updateMember(1L, updatedMemberRequest);
 

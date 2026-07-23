@@ -103,9 +103,14 @@ class AuthorServiceTest {
         AuthorResponse updatedAuthorResponse = new AuthorResponse(1L, "John Doe Updated", "john.doe.updated@example.com");
 
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
-        doNothing().when(authorMapper).updateEntityFromRequest(updatedAuthorRequest, author);
-        when(authorRepository.save(author)).thenReturn(updatedAuthor);
-        when(authorMapper.toResponse(updatedAuthor)).thenReturn(updatedAuthorResponse);
+        lenient().doAnswer(invocation -> {
+            Author a = invocation.getArgument(1);
+            a.setFullName(updatedAuthorRequest.getFullName());
+            a.setEmail(updatedAuthorRequest.getEmail());
+            return null;
+        }).when(authorMapper).updateEntityFromRequest(updatedAuthorRequest, author);
+        when(authorRepository.save(author)).thenReturn(author);
+        when(authorMapper.toResponse(author)).thenReturn(updatedAuthorResponse);
 
         AuthorResponse result = authorService.updateAuthor(1L, updatedAuthorRequest);
 
