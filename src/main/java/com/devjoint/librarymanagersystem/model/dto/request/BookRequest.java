@@ -43,6 +43,10 @@ public class BookRequest {
     @NotNull(message = "Published date cannot be null")
     private LocalDate publishedDate;
 
+    @Schema(
+            description = "Author ID",
+            example = "1"
+    )
     @NotNull(message = "Author ID cannot be null")
     @Positive(message = "Author ID must be positive")
     private Long authorId;
