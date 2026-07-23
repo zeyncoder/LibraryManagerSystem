@@ -36,6 +36,10 @@ public class BookRequest {
     @Positive(message = "Book price must be positive")
     private Double price;
 
+    @Schema(
+            description = "Book publication date",
+            example = "2008-08-11"
+    )
     @NotNull(message = "Published date cannot be null")
     private LocalDate publishedDate;
 
