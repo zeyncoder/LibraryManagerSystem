@@ -21,6 +21,10 @@ public class BookRequest {
     @NotBlank(message = "Book title cannot be empty")
     private String title;
 
+    @Schema(
+            description = "Book ISBN number",
+            example = "9780132350884"
+    )
     @NotBlank(message = "Book ISBN cannot be empty")
     private String isbn;
 
