@@ -1,5 +1,7 @@
 package com.devjoint.librarymanagersystem.config;
 
+import com.devjoint.librarymanagersystem.security.JwtAccessDeniedHandler;
+import com.devjoint.librarymanagersystem.security.JwtAuthenticationEntryPoint;
 import com.devjoint.librarymanagersystem.security.JwtAuthenticationFilter;
 import com.devjoint.librarymanagersystem.service.impl.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
 
 
@@ -57,9 +61,18 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/api/admin/**")
+                        .hasAuthority("ADMIN")
 
+                        .requestMatchers("/api/user/**")
+                        .hasAnyAuthority("USER", "ADMIN")
+
+                        .anyRequest()
+                        .authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
