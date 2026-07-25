@@ -52,7 +52,22 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean isTokenValid(String token, String username) {
 
-        return extractUsername(token).equals(username);
+        return extractUsername(token).equals(username)
+                && !isTokenExpired(token);
 
+    }
+
+    @Override
+    public Date extractExpiration(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getExpiration();
+    }
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
     }
 }
