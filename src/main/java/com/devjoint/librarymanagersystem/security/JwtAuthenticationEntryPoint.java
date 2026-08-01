@@ -1,7 +1,8 @@
 package com.devjoint.librarymanagersystem.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.devjoint.librarymanagersystem.model.dto.response.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -21,11 +22,19 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException)
             throws IOException {
 
+        Exception exception = (Exception) request.getAttribute("exception");
+
+        String message = "Authentication is required";
+
+        if (exception instanceof ExpiredJwtException) {
+            message = "JWT token has expired";
+        }
+
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpServletResponse.SC_UNAUTHORIZED,
                 "Unauthorized",
-                "Authentication is required",
+                message,
                 request.getRequestURI(),
                 null
         );

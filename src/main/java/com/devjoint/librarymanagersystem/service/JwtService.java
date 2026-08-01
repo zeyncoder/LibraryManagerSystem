@@ -1,9 +1,12 @@
 package com.devjoint.librarymanagersystem.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Date;
+import java.util.Map;
 
 public interface JwtService {
-    String generateToken(String username);
+    String generateToken(Map<String, Object> claims, UserDetails userDetails);
 
     String extractUsername(String token);
 
