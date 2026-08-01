@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -52,4 +53,6 @@ public class BookRequest {
     @NotNull(message = "Author ID cannot be null")
     @Positive(message = "Author ID must be positive")
     private Long authorId;
+
+    private Set<Long> categoryIds;
 }

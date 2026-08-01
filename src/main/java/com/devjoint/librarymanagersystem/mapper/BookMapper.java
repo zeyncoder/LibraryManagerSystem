@@ -1,25 +1,31 @@
 package com.devjoint.librarymanagersystem.mapper;
 
-
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
 import com.devjoint.librarymanagersystem.model.entity.Book;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {AuthorMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {
+                AuthorMapper.class,
+                CategoryMapper.class
+        }
+)
 public interface BookMapper {
-    BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "author", ignore = true)
-    Book toEntity(BookRequest bookRequest);
+    @Mapping(target = "categories", ignore = true)
+    Book toEntity(BookRequest request);
 
     BookResponse toResponse(Book book);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "author", ignore = true)
-    void updateEntityFromRequest(BookRequest bookRequest, @MappingTarget Book book);
+    @Mapping(target = "categories", ignore = true)
+    void updateEntityFromRequest(BookRequest request,
+                                 @MappingTarget Book book);
 }
