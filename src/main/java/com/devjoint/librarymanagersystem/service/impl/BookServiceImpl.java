@@ -108,4 +108,33 @@ public class BookServiceImpl implements BookService {
 
         bookRepository.delete(book);
     }
+    @Override
+    public Page<BookResponse> getBooksByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
+        return bookRepository.findByPriceBetween(minPrice, maxPrice, pageable)
+                .map(bookMapper::toResponse);
+    }
+
+    @Override
+    public Page<BookResponse> getBooksByAuthor(String authorName, Pageable pageable) {
+        return bookRepository.findByAuthorFullNameContainingIgnoreCase(authorName, pageable)
+                .map(bookMapper::toResponse);
+    }
+
+    @Override
+    public Page<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
+        return bookRepository.findByCategoriesNameIgnoreCase(categoryName, pageable)
+                .map(bookMapper::toResponse);
+    }
+
+    @Override
+    public Page<BookResponse> getBooksWithPriceGreaterThan(Double price, Pageable pageable) {
+        return bookRepository.findBooksWithPriceGreaterThan(price, pageable)
+                .map(bookMapper::toResponse);
+    }
+
+    @Override
+    public Page<BookResponse> getBooksWithPriceGreaterThanNative(Double price, Pageable pageable) {
+        return bookRepository.findBooksWithPriceGreaterThanNative(price, pageable)
+                .map(bookMapper::toResponse);
+    }
 }

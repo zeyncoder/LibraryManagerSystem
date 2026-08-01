@@ -6,6 +6,7 @@ import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
 import com.devjoint.librarymanagersystem.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -57,5 +58,43 @@ public class BookController {
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/price-range")
+    public ResponseEntity<Page<BookResponse>> getBooksByPriceRange(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice,
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(bookService.getBooksByPriceRange(minPrice, maxPrice, pageable));
+    }
+
+    @GetMapping("/author")
+    public ResponseEntity<Page<BookResponse>> getBooksByAuthor(
+            @RequestParam String authorName,
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(bookService.getBooksByAuthor(authorName, pageable));
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<Page<BookResponse>> getBooksByCategory(
+            @RequestParam String categoryName,
+          @ParameterObject  Pageable pageable) {
+        return ResponseEntity.ok(bookService.getBooksByCategory(categoryName, pageable));
+    }
+
+    @GetMapping("/jpql")
+    public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThan(
+            @RequestParam Double price,
+           @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(bookService.getBooksWithPriceGreaterThan(price, pageable));
+    }
+
+    @GetMapping("/native")
+    public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThanNative(
+            @RequestParam Double price,
+           @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(bookService.getBooksWithPriceGreaterThanNative(price, pageable));
     }
 }
