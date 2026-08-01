@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class BookServiceImpl implements BookService {
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
     private final BookMapper bookMapper;
-
+    @Transactional
     @Override
     public BookResponse createBook(BookRequest bookRequest) {
 
@@ -38,7 +39,6 @@ public class BookServiceImpl implements BookService {
                         "Author not found with id: " + bookRequest.getAuthorId()));
 
         Book book = bookMapper.toEntity(bookRequest);
-
         book.setAuthor(author);
 
         if (bookRequest.getCategoryIds() != null && !bookRequest.getCategoryIds().isEmpty()) {
@@ -50,7 +50,8 @@ public class BookServiceImpl implements BookService {
             book.setCategories(categories);
         }
 
-        return bookMapper.toResponse(bookRepository.save(book));
+        Book savedBook = bookRepository.save(book);
+        return bookMapper.toResponse(savedBook);
     }
 
     @Override
