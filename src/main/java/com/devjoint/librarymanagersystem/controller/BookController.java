@@ -37,13 +37,13 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "Get all books with pagination and sorting")
-    public ResponseEntity<Page<BookResponse>> getAllBooks(Pageable pageable) {
+    public ResponseEntity<Page<BookResponse>> getAllBooks(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search books by title with pagination and sorting")
-    public ResponseEntity<Page<BookResponse>> searchBooks(@RequestParam String title, Pageable pageable) {
+    public ResponseEntity<Page<BookResponse>> searchBooks(@RequestParam String title, @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(bookService.searchBooks(title, pageable));
     }
 
@@ -62,6 +62,7 @@ public class BookController {
 
 
     @GetMapping("/price-range")
+    @Operation(summary = "Get books by price range")
     public ResponseEntity<Page<BookResponse>> getBooksByPriceRange(
             @RequestParam Double minPrice,
             @RequestParam Double maxPrice,
@@ -71,6 +72,7 @@ public class BookController {
     }
 
     @GetMapping("/author")
+    @Operation(summary = "Get books by author")
     public ResponseEntity<Page<BookResponse>> getBooksByAuthor(
             @RequestParam String authorName,
             @ParameterObject Pageable pageable) {
@@ -78,6 +80,7 @@ public class BookController {
     }
 
     @GetMapping("/category")
+    @Operation(summary = "Get books by category")
     public ResponseEntity<Page<BookResponse>> getBooksByCategory(
             @RequestParam String categoryName,
           @ParameterObject  Pageable pageable) {
@@ -85,6 +88,7 @@ public class BookController {
     }
 
     @GetMapping("/jpql")
+    @Operation(summary = "Get books using JPQL query")
     public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThan(
             @RequestParam Double price,
            @ParameterObject Pageable pageable) {
@@ -92,9 +96,31 @@ public class BookController {
     }
 
     @GetMapping("/native")
+    @Operation(summary = "Get books using native SQL query")
     public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThanNative(
             @RequestParam Double price,
            @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(bookService.getBooksWithPriceGreaterThanNative(price, pageable));
+    }
+    @GetMapping("/filter")
+    @Operation(summary = "Dynamic book filtering")
+    public ResponseEntity<Page<BookResponse>> filterBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.filterBooks(
+                        title,
+                        author,
+                        category,
+                        minPrice,
+                        maxPrice,
+                        pageable
+                )
+        );
     }
 }

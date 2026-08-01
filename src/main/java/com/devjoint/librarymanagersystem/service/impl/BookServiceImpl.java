@@ -11,9 +11,11 @@ import com.devjoint.librarymanagersystem.repository.AuthorRepository;
 import com.devjoint.librarymanagersystem.repository.BookRepository;
 import com.devjoint.librarymanagersystem.repository.CategoryRepository;
 import com.devjoint.librarymanagersystem.service.BookService;
+import com.devjoint.librarymanagersystem.specification.BookSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -135,6 +137,24 @@ public class BookServiceImpl implements BookService {
     @Override
     public Page<BookResponse> getBooksWithPriceGreaterThanNative(Double price, Pageable pageable) {
         return bookRepository.findBooksWithPriceGreaterThanNative(price, pageable)
+                .map(bookMapper::toResponse);
+    }
+    @Override
+    public Page<BookResponse> filterBooks(
+            String title,
+            String author,
+            String category,
+            Double minPrice,
+            Double maxPrice,
+            Pageable pageable) {
+
+        Specification<Book> specification = Specification
+                .where(BookSpecification.hasTitle(title))
+                .and(BookSpecification.hasAuthor(author))
+                .and(BookSpecification.hasCategory(category))
+                .and(BookSpecification.hasPriceBetween(minPrice, maxPrice));
+
+        return bookRepository.findAll(specification, pageable)
                 .map(bookMapper::toResponse);
     }
 }

@@ -23,4 +23,12 @@ public interface BookService {
     Page<BookResponse> getBooksWithPriceGreaterThan(Double price, Pageable pageable);
 
     Page<BookResponse> getBooksWithPriceGreaterThanNative(Double price, Pageable pageable);
+    Page<BookResponse> filterBooks(
+            String title,
+            String author,
+            String category,
+            Double minPrice,
+            Double maxPrice,
+            Pageable pageable
+    );
 }
