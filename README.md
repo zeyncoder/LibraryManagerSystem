@@ -9,11 +9,15 @@ A RESTful Library Management System built with Spring Boot. The application prov
 - Spring Security
 - JWT (JSON Web Token)
 - Spring Data JPA
+- Hibernate
 - PostgreSQL
 - Gradle
 - Lombok
 - MapStruct
 - Swagger/OpenAPI
+- JUnit 5
+- Mockito
+- H2 Database (Testing)
 
 ## Features
 
@@ -30,6 +34,12 @@ A RESTful Library Management System built with Spring Boot. The application prov
 - Protected API Endpoints
 - Custom Authentication & Authorization Error Handling (401 / 403)
 - JWT Token Expiration Validation
+- Custom JPQL & Native SQL Queries
+- Dynamic Filtering with JPA Specification
+- Transaction Management (`@Transactional`)
+- Unit Tests
+- Integration Tests
+- Rollback Transaction Tests
 
 ## Project Structure
 
@@ -44,7 +54,9 @@ src
 │   └── entity
 ├── repository
 ├── security
-└── service
+├── specification
+├── service
+└── test
 ```
 
 ## Getting Started
@@ -97,7 +109,7 @@ OpenAPI JSON:
 http://localhost:8080/v3/api-docs
 ```
 
-### Authentication
+## Authentication
 
 1. Register a new user using `/api/auth/register`
 2. Login using `/api/auth/login`
@@ -105,7 +117,7 @@ http://localhost:8080/v3/api-docs
 4. Click **Authorize** in Swagger.
 5. Enter:
 
-```
+```text
 Bearer <your_token>
 ```
 
@@ -119,6 +131,21 @@ Bearer <your_token>
 - 401 Unauthorized handling
 - 403 Forbidden handling
 - JWT Expiration Validation
+
+## Testing
+
+The project includes:
+
+- Unit Tests (Mockito)
+- Integration Tests (Spring Boot + H2)
+- Transaction Rollback Tests
+- Repository Query Tests
+
+Run all tests:
+
+```bash
+./gradlew test
+```
 
 ## Author
 
