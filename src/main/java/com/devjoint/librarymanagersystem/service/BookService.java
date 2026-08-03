@@ -31,4 +31,5 @@ public interface BookService {
             Double maxPrice,
             Pageable pageable
     );
+    void createBookAndFail(BookRequest request);
 }

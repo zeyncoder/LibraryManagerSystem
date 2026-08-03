@@ -158,4 +158,26 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll(specification, pageable)
                 .map(bookMapper::toResponse);
     }
+    @Transactional
+    @Override
+    public void createBookAndFail(BookRequest bookRequest) {
+
+        Author author = authorRepository.findById(bookRequest.getAuthorId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Author not found with id: " + bookRequest.getAuthorId()));
+
+        Book book = bookMapper.toEntity(bookRequest);
+        book.setAuthor(author);
+
+        if (bookRequest.getCategoryIds() != null && !bookRequest.getCategoryIds().isEmpty()) {
+            Set<Category> categories = new HashSet<>(
+                    categoryRepository.findAllByIdIn(bookRequest.getCategoryIds())
+            );
+            book.setCategories(categories);
+        }
+
+        bookRepository.save(book);
+
+        throw new RuntimeException("Rollback test");
+    }
 }

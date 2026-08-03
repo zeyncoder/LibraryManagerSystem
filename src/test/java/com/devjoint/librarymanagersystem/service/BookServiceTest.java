@@ -24,9 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -53,10 +51,37 @@ class BookServiceTest {
 
     @BeforeEach
     void setUp() {
-        author = new Author(1L, "John Doe", "john.doe@example.com", null);
-        book = new Book(1L, "Spring Boot in Action", "978-1617297571", 45.0, LocalDate.of(2020, 1, 1), author);
-        bookRequest = new BookRequest("Spring Boot in Action", "978-1617297571", 45.0, LocalDate.of(2020, 1, 1), 1L);
-        bookResponse = new BookResponse(1L, "Spring Boot in Action", "978-1617297571", 45.0, LocalDate.of(2020, 1, 1), new AuthorResponse(1L, "John Doe", "john.doe@example.com"));
+
+        author = new Author();
+        author.setId(1L);
+        author.setFullName("John Doe");
+        author.setEmail("john.doe@example.com");
+
+        book = new Book();
+        book.setId(1L);
+        book.setTitle("Spring Boot in Action");
+        book.setIsbn("978-1617297571");
+        book.setPrice(45.0);
+        book.setPublishedDate(LocalDate.of(2020, 1, 1));
+        book.setAuthor(author);
+        book.setCategories(new HashSet<>());
+
+        bookRequest = new BookRequest();
+        bookRequest.setTitle("Spring Boot in Action");
+        bookRequest.setIsbn("978-1617297571");
+        bookRequest.setPrice(45.0);
+        bookRequest.setPublishedDate(LocalDate.of(2020, 1, 1));
+        bookRequest.setAuthorId(1L);
+        bookRequest.setCategoryIds(new HashSet<>());
+
+        bookResponse = new BookResponse();
+        bookResponse.setId(1L);
+        bookResponse.setTitle("Spring Boot in Action");
+        bookResponse.setIsbn("978-1617297571");
+        bookResponse.setPrice(45.0);
+        bookResponse.setPublishedDate(LocalDate.of(2020, 1, 1));
+        bookResponse.setAuthor(new AuthorResponse(1L, "John Doe", "john.doe@example.com"));
+        bookResponse.setCategories(new HashSet<>());
     }
 
     @Test
@@ -106,10 +131,27 @@ class BookServiceTest {
     @Test
     void getAllBooks() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Book> books = Arrays.asList(book, new Book(2L, "Clean Code", "978-0132350884", 35.0, LocalDate.of(2008, 8, 1), author));
-        Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
-        List<BookResponse> bookResponses = Arrays.asList(bookResponse, new BookResponse(2L, "Clean Code", "978-0132350884", 35.0, LocalDate.of(2008, 8, 1), new AuthorResponse(1L, "John Doe", "john.doe@example.com")));
+        Book secondBook = new Book();
+        secondBook.setId(2L);
+        secondBook.setTitle("Clean Code");
+        secondBook.setIsbn("978-0132350884");
+        secondBook.setPrice(35.0);
+        secondBook.setPublishedDate(LocalDate.of(2008, 8, 1));
+        secondBook.setAuthor(author);
+        secondBook.setCategories(new HashSet<>());
 
+        List<Book> books = List.of(book, secondBook);
+        Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
+        BookResponse secondResponse = new BookResponse();
+        secondResponse.setId(2L);
+        secondResponse.setTitle("Clean Code");
+        secondResponse.setIsbn("978-0132350884");
+        secondResponse.setPrice(35.0);
+        secondResponse.setPublishedDate(LocalDate.of(2008, 8, 1));
+        secondResponse.setAuthor(new AuthorResponse(1L, "John Doe", "john.doe@example.com"));
+        secondResponse.setCategories(new HashSet<>());
+
+        List<BookResponse> bookResponses = List.of(bookResponse, secondResponse);
         when(bookRepository.findAll(pageable)).thenReturn(bookPage);
         when(bookMapper.toResponse(books.get(0))).thenReturn(bookResponses.get(0));
         when(bookMapper.toResponse(books.get(1))).thenReturn(bookResponses.get(1));
@@ -125,9 +167,9 @@ class BookServiceTest {
     @Test
     void searchBooks() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Book> books = Arrays.asList(book);
+        List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
-        List<BookResponse> bookResponses = Arrays.asList(bookResponse);
+        List<BookResponse> bookResponses = List.of(bookResponse);
 
         when(bookRepository.findByTitleContainingIgnoreCase("spring", pageable)).thenReturn(bookPage);
         when(bookMapper.toResponse(book)).thenReturn(bookResponse);
@@ -142,10 +184,23 @@ class BookServiceTest {
 
     @Test
     void updateBook() {
-        Book updatedBook = new Book(1L, "Spring Boot in Action Updated", "978-1617297572", 50.0, LocalDate.of(2021, 1, 1), author);
-        BookRequest updatedBookRequest = new BookRequest("Spring Boot in Action Updated", "978-1617297572", 50.0, LocalDate.of(2021, 1, 1), 1L);
-        BookResponse updatedBookResponse = new BookResponse(1L, "Spring Boot in Action Updated", "978-1617297572", 50.0, LocalDate.of(2021, 1, 1), new AuthorResponse(1L, "John Doe", "john.doe@example.com"));
+        BookRequest updatedBookRequest = new BookRequest();
+        updatedBookRequest.setTitle("Spring Boot in Action Updated");
+        updatedBookRequest.setIsbn("978-1617297572");
+        updatedBookRequest.setPrice(50.0);
+        updatedBookRequest.setPublishedDate(LocalDate.of(2021, 1, 1));
+        updatedBookRequest.setAuthorId(1L);
+        updatedBookRequest.setCategoryIds(new HashSet<>());
 
+        BookResponse updatedBookResponse = new BookResponse(
+                1L,
+                "Spring Boot in Action Updated",
+                "978-1617297572",
+                50.0,
+                LocalDate.of(2021, 1, 1),
+                new AuthorResponse(1L, "John Doe", "john.doe@example.com"),
+                 Set.of()
+        );
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
         lenient().doAnswer(invocation -> {
