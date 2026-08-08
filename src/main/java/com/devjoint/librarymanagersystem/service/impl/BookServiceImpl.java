@@ -12,6 +12,7 @@ import com.devjoint.librarymanagersystem.repository.BookRepository;
 import com.devjoint.librarymanagersystem.repository.CategoryRepository;
 import com.devjoint.librarymanagersystem.service.BookService;
 import com.devjoint.librarymanagersystem.specification.BookSpecification;
+import org.springframework.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Cacheable("books")
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(

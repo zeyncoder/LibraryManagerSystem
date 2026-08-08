@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -32,6 +36,8 @@ class BookIntegrationTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private CacheManager cacheManager;
 
     @Test
     void createBook_shouldSaveSuccessfully() {
@@ -117,5 +123,46 @@ class BookIntegrationTest {
         bookService.deleteBook(created.getId());
 
         assertFalse(bookRepository.findById(created.getId()).isPresent());
+    }
+    @Test
+    void getBookById_shouldUseCache() {
+
+        Author author = new Author();
+        author.setFullName("Cache Author");
+        author.setEmail("cache@test.com");
+        author = authorRepository.save(author);
+
+        Category category = new Category();
+        category.setName("Cache Category");
+        category = categoryRepository.save(category);
+
+        BookRequest request = new BookRequest();
+        request.setTitle("Cached Book");
+        request.setIsbn("CACHE-123");
+        request.setPrice(30.0);
+        request.setPublishedDate(LocalDate.now());
+        request.setAuthorId(author.getId());
+        request.setCategoryIds(Set.of(category.getId()));
+
+        BookResponse created = bookService.createBook(request);
+
+        Cache cache = cacheManager.getCache("books");
+
+        assertNotNull(cache);
+
+        cache.clear();
+
+        BookResponse firstResult = bookService.getBookById(created.getId());
+
+        assertNotNull(firstResult);
+        assertEquals(created.getId(), firstResult.getId());
+
+        assertNotNull(cache.get(created.getId()));
+
+        BookResponse secondResult = bookService.getBookById(created.getId());
+
+        assertNotNull(secondResult);
+        assertEquals(firstResult.getId(), secondResult.getId());
+        assertEquals(firstResult.getTitle(), secondResult.getTitle());
     }
 }
