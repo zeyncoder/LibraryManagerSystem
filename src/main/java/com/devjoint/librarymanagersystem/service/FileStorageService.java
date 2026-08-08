@@ -9,5 +9,6 @@ public interface FileStorageService {
     String saveFile(MultipartFile file) throws IOException;
 
     byte[] getFile(String fileName) throws IOException;
+    void deleteFile(String fileName) throws IOException;
 
 }

@@ -46,4 +46,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 
         return Files.readAllBytes(filePath);
     }
+
+    @Override
+    public void deleteFile(String fileName) throws IOException {
+
+        if (fileName == null || fileName.isBlank()) {
+            return;
+        }
+
+        Path filePath = uploadDirectory.resolve(fileName);
+
+        Files.deleteIfExists(filePath);
+    }
 }

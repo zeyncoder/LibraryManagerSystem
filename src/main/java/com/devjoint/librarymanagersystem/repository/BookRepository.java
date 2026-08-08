@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -41,4 +42,11 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     @Override
     @EntityGraph(attributePaths = {"author", "categories"})
     Optional<Book> findById(Long id);
+
+    @Query("""
+        select b.coverImage
+        from Book b
+        where b.coverImage is not null
+        """)
+    List<String> findAllCoverImages();
 }
