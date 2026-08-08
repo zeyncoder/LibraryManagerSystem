@@ -11,6 +11,7 @@ import com.devjoint.librarymanagersystem.repository.AuthorRepository;
 import com.devjoint.librarymanagersystem.repository.BookRepository;
 import com.devjoint.librarymanagersystem.repository.CategoryRepository;
 import com.devjoint.librarymanagersystem.service.BookService;
+import com.devjoint.librarymanagersystem.service.FileStorageService;
 import com.devjoint.librarymanagersystem.specification.BookSpecification;
 import org.springframework.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +34,8 @@ public class BookServiceImpl implements BookService {
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
     private final BookMapper bookMapper;
+    private final FileStorageService fileStorageService;
+
     @Transactional
     @Override
     public BookResponse createBook(BookRequest bookRequest) {
@@ -182,4 +187,62 @@ public class BookServiceImpl implements BookService {
 
         throw new RuntimeException("Rollback test");
     }
+    @Override
+    public String uploadCover(Long bookId, MultipartFile file) {
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Book not found with id: " + bookId));
+
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File cannot be empty");
+        }
+
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException(
+                    "File size must not exceed 5 MB");
+        }
+
+        String contentType = file.getContentType();
+
+        if (!Set.of(
+                "image/jpeg",
+                "image/png"
+        ).contains(contentType)) {
+            throw new IllegalArgumentException(
+                    "Only JPG, JPEG and PNG files are allowed");
+        }
+
+        try {
+            String fileName = fileStorageService.saveFile(file);
+
+            book.setCoverImage(fileName);
+            bookRepository.save(book);
+
+            return fileName;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save cover image", e);
+        }
+    }
+    @Override
+    public byte[] downloadCover(Long bookId) {
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Book not found with id: " + bookId));
+
+        if (book.getCoverImage() == null) {
+            throw new ResourceNotFoundException(
+                    "Cover image not found for book id: " + bookId);
+        }
+
+        try {
+            return fileStorageService.getFile(book.getCoverImage());
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read cover image", e);
+        }
+    }
+
 }

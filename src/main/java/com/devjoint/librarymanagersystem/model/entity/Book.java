@@ -31,6 +31,9 @@ public class Book {
     @Column(nullable = false)
     private LocalDate publishedDate;
 
+    @Column(name = "cover_image")
+    private String coverImage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;

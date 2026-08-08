@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Tag(name = "Book Controller", description = "Operations related to books")
@@ -123,4 +126,31 @@ public class BookController {
                 )
         );
     }
+    @PostMapping(
+            value = "/{id}/cover",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @Operation(summary = "Upload book cover")
+    public ResponseEntity<String> uploadCover(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(
+                bookService.uploadCover(id, file)
+        );
+    }
+    @GetMapping("/{id}/cover")
+    @Operation(summary = "Download book cover")
+    public ResponseEntity<ByteArrayResource> downloadCover(
+            @PathVariable Long id) {
+
+        byte[] file = bookService.downloadCover(id);
+
+        ByteArrayResource resource = new ByteArrayResource(file);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
 }

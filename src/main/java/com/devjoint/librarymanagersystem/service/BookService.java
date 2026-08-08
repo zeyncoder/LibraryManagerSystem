@@ -4,6 +4,7 @@ import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -32,4 +33,7 @@ public interface BookService {
             Pageable pageable
     );
     void createBookAndFail(BookRequest request);
+    String uploadCover(Long bookId, MultipartFile file);
+
+    byte[] downloadCover(Long bookId);
 }
