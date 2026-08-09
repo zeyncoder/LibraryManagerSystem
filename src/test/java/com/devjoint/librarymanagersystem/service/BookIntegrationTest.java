@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -164,5 +164,42 @@ class BookIntegrationTest {
         assertNotNull(secondResult);
         assertEquals(firstResult.getId(), secondResult.getId());
         assertEquals(firstResult.getTitle(), secondResult.getTitle());
+    }
+    @Test
+    void updateBook_shouldEvictCache() {
+
+        Author author = new Author();
+        author.setFullName("Cache Test Author");
+        author.setEmail("cache-update@test.com");
+        author = authorRepository.save(author);
+
+        Category category = new Category();
+        category.setName("Cache Test");
+        category = categoryRepository.save(category);
+
+        BookRequest request = new BookRequest();
+        request.setTitle("Old Title");
+        request.setIsbn("CACHE-UPDATE-123");
+        request.setPrice(30.0);
+        request.setPublishedDate(LocalDate.now());
+        request.setAuthorId(author.getId());
+        request.setCategoryIds(Set.of(category.getId()));
+
+        BookResponse created = bookService.createBook(request);
+
+
+        BookResponse first = bookService.getBookById(created.getId());
+
+        assertEquals("Old Title", first.getTitle());
+
+
+        request.setTitle("Updated Title");
+
+        bookService.updateBook(created.getId(), request);
+
+
+        BookResponse updated = bookService.getBookById(created.getId());
+
+        assertEquals("Updated Title", updated.getTitle());
     }
 }

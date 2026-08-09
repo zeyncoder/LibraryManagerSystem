@@ -14,6 +14,7 @@ import com.devjoint.librarymanagersystem.service.BookService;
 import com.devjoint.librarymanagersystem.service.FileStorageService;
 import com.devjoint.librarymanagersystem.service.NotificationService;
 import com.devjoint.librarymanagersystem.specification.BookSpecification;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -85,7 +86,8 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findByTitleContainingIgnoreCase(title, pageable)
                 .map(bookMapper::toResponse);
     }
-
+    @Transactional
+    @CacheEvict(value = "books", key = "#id")
     @Override
     public BookResponse updateBook(Long id, BookRequest bookRequest) {
         Book existingBook = bookRepository.findById(id)
@@ -114,6 +116,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toResponse(bookRepository.save(existingBook));
     }
 
+    @CacheEvict(value = "books", key = "#id")
     @Override
     public void deleteBook(Long id) {
 
