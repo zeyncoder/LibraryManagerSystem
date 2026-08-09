@@ -1,3 +1,9 @@
 spring:
   application:
     name: library-manager-system
+
+server:
+  port: 8080
+
+jwt:
+  expiration: ${JWT_EXPIRATION:86400000}
