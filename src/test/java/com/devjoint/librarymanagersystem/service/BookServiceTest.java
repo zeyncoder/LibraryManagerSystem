@@ -40,7 +40,8 @@ class BookServiceTest {
 
     @Mock
     private BookMapper bookMapper;
-
+    @Mock
+    private NotificationService notificationService;
     @InjectMocks
     private BookServiceImpl bookService;
 
