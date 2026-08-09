@@ -12,6 +12,7 @@ import com.devjoint.librarymanagersystem.repository.BookRepository;
 import com.devjoint.librarymanagersystem.repository.CategoryRepository;
 import com.devjoint.librarymanagersystem.service.BookService;
 import com.devjoint.librarymanagersystem.service.FileStorageService;
+import com.devjoint.librarymanagersystem.service.NotificationService;
 import com.devjoint.librarymanagersystem.specification.BookSpecification;
 import org.springframework.cache.annotation.Cacheable;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class BookServiceImpl implements BookService {
     private final CategoryRepository categoryRepository;
     private final BookMapper bookMapper;
     private final FileStorageService fileStorageService;
+    private final NotificationService notificationService;
 
     @Transactional
     @Override
@@ -57,6 +59,9 @@ public class BookServiceImpl implements BookService {
         }
 
         Book savedBook = bookRepository.save(book);
+        notificationService.sendNotification(
+                "New book created: " + savedBook.getTitle()
+        );
         return bookMapper.toResponse(savedBook);
     }
 
