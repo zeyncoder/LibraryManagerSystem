@@ -4,6 +4,8 @@ package com.devjoint.librarymanagersystem.controller;
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
 import com.devjoint.librarymanagersystem.service.BookService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -27,19 +29,49 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    @Operation(summary = "Create a new book")
+    @Operation(
+            summary = "Create a new book",
+            description = "Creates a new book and stores it in the database."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Book created successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid book data"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            )
+    })
     public ResponseEntity<BookResponse> createBook(@Valid @RequestBody BookRequest bookRequest) {
         return new ResponseEntity<>(bookService.createBook(bookRequest), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get book by ID")
+    @Operation(
+            summary = "Get book by ID",
+            description = "Retrieves a book using its unique ID"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Book retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
     public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookById(id));
     }
 
     @GetMapping
-    @Operation(summary = "Get all books with pagination and sorting")
+    @Operation(
+            summary = "Get all books",
+            description = "Retrieves all books with pagination and sorting support"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Books retrieved successfully")
+    })
     public ResponseEntity<Page<BookResponse>> getAllBooks(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
@@ -51,13 +83,28 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing book")
+    @Operation(
+            summary = "Update a book",
+            description = "Updates an existing book by ID"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
     public ResponseEntity<BookResponse> updateBook(@PathVariable Long id, @Valid @RequestBody BookRequest bookRequest) {
         return ResponseEntity.ok(bookService.updateBook(id, bookRequest));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a book by ID")
+    @Operation(
+            summary = "Delete a book",
+            description = "Deletes a book by its unique ID"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Book deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
@@ -130,7 +177,24 @@ public class BookController {
             value = "/{id}/cover",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    @Operation(summary = "Upload book cover")
+    @Operation(
+            summary = "Upload book cover",
+            description = "Uploads a cover image for the specified book."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Book cover uploaded successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid file type or file size"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book not found"
+            )
+    })
     public ResponseEntity<String> uploadCover(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
@@ -140,7 +204,20 @@ public class BookController {
         );
     }
     @GetMapping("/{id}/cover")
-    @Operation(summary = "Download book cover")
+    @Operation(
+            summary = "Download book cover",
+            description = "Downloads the cover image associated with the specified book."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Book cover downloaded successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book cover not found"
+            )
+    })
     public ResponseEntity<ByteArrayResource> downloadCover(
             @PathVariable Long id) {
 

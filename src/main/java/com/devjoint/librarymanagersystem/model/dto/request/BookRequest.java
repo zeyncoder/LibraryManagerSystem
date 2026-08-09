@@ -54,5 +54,9 @@ public class BookRequest {
     @Positive(message = "Author ID must be positive")
     private Long authorId;
 
+    @Schema(
+            description = "IDs of categories assigned to the book",
+            example = "[1, 2]"
+    )
     private Set<Long> categoryIds;
 }
