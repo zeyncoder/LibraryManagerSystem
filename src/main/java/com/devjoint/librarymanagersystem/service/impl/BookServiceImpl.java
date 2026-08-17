@@ -67,6 +67,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable("books")
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
@@ -76,12 +77,14 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getAllBooks(Pageable pageable) {
         return bookRepository.findAll(pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> searchBooks(String title, Pageable pageable) {
         return bookRepository.findByTitleContainingIgnoreCase(title, pageable)
                 .map(bookMapper::toResponse);
@@ -127,35 +130,41 @@ public class BookServiceImpl implements BookService {
         bookRepository.delete(book);
     }
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getBooksByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
         return bookRepository.findByPriceBetween(minPrice, maxPrice, pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getBooksByAuthor(String authorName, Pageable pageable) {
         return bookRepository.findByAuthorFullNameContainingIgnoreCase(authorName, pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
         return bookRepository.findByCategoriesNameIgnoreCase(categoryName, pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getBooksWithPriceGreaterThan(Double price, Pageable pageable) {
         return bookRepository.findBooksWithPriceGreaterThan(price, pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> getBooksWithPriceGreaterThanNative(Double price, Pageable pageable) {
         return bookRepository.findBooksWithPriceGreaterThanNative(price, pageable)
                 .map(bookMapper::toResponse);
     }
     @Override
+    @Transactional(readOnly = true)
     public Page<BookResponse> filterBooks(
             String title,
             String author,
@@ -196,6 +205,7 @@ public class BookServiceImpl implements BookService {
         throw new RuntimeException("Rollback test");
     }
     @Override
+    @Transactional
     public String uploadCover(Long bookId, MultipartFile file) {
 
         Book book = bookRepository.findById(bookId)
@@ -234,6 +244,7 @@ public class BookServiceImpl implements BookService {
         }
     }
     @Override
+    @Transactional(readOnly = true)
     public byte[] downloadCover(Long bookId) {
 
         Book book = bookRepository.findById(bookId)
