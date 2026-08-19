@@ -3,6 +3,7 @@ package com.devjoint.librarymanagersystem.controller;
 
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
+import com.devjoint.librarymanagersystem.model.dto.response.FileDownloadResponse;
 import com.devjoint.librarymanagersystem.service.BookService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -220,13 +221,11 @@ public class BookController {
     })
     public ResponseEntity<ByteArrayResource> downloadCover(
             @PathVariable Long id) {
-
-        byte[] file = bookService.downloadCover(id);
-
-        ByteArrayResource resource = new ByteArrayResource(file);
-
+        FileDownloadResponse file = bookService.downloadCover(id);
+        ByteArrayResource resource =
+                new ByteArrayResource(file.data());
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(file.contentType())
                 .body(resource);
     }
 

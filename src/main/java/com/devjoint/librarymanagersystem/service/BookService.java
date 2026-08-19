@@ -2,6 +2,7 @@ package com.devjoint.librarymanagersystem.service;
 
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
+import com.devjoint.librarymanagersystem.model.dto.response.FileDownloadResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,5 @@ public interface BookService {
     );
     void createBookAndFail(BookRequest request);
     String uploadCover(Long bookId, MultipartFile file);
-
-    byte[] downloadCover(Long bookId);
+    FileDownloadResponse downloadCover(Long bookId);
 }

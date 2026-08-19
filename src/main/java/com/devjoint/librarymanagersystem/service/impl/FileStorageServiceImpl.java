@@ -1,6 +1,8 @@
 package com.devjoint.librarymanagersystem.service.impl;
 
+import com.devjoint.librarymanagersystem.model.dto.response.FileDownloadResponse;
 import com.devjoint.librarymanagersystem.service.FileStorageService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +16,9 @@ import java.util.UUID;
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final Path uploadDirectory =
-            Paths.get("uploads/covers");
+            Paths.get("uploads/covers")
+                    .toAbsolutePath()
+                    .normalize();
 
     @Override
     public String saveFile(MultipartFile file) throws IOException {
@@ -32,7 +36,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
         String fileName = UUID.randomUUID() + extension;
 
-        Path filePath = uploadDirectory.resolve(fileName);
+        Path filePath = getSafePath(fileName);
 
         Files.write(filePath, file.getBytes());
 
@@ -40,11 +44,22 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public byte[] getFile(String fileName) throws IOException {
+    public FileDownloadResponse getFile(String fileName) throws IOException {
 
-        Path filePath = uploadDirectory.resolve(fileName);
+        Path filePath = getSafePath(fileName);
 
-        return Files.readAllBytes(filePath);
+        byte[] data = Files.readAllBytes(filePath);
+
+        String contentType = Files.probeContentType(filePath);
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return new FileDownloadResponse(
+                data,
+                MediaType.parseMediaType(contentType)
+        );
     }
 
     @Override
@@ -54,8 +69,27 @@ public class FileStorageServiceImpl implements FileStorageService {
             return;
         }
 
-        Path filePath = uploadDirectory.resolve(fileName);
+        Path filePath = getSafePath(fileName);
 
         Files.deleteIfExists(filePath);
+    }
+
+    private Path getSafePath(String fileName) {
+
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "File name cannot be empty"
+            );
+        }
+
+        Path filePath = uploadDirectory
+                .resolve(fileName)
+                .normalize();
+
+        if (!filePath.startsWith(uploadDirectory)) {
+            throw new SecurityException("Invalid file path");
+        }
+
+        return filePath;
     }
 }

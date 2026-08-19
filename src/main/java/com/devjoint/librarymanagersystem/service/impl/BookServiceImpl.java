@@ -4,6 +4,7 @@ import com.devjoint.librarymanagersystem.exception.ResourceNotFoundException;
 import com.devjoint.librarymanagersystem.mapper.BookMapper;
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
+import com.devjoint.librarymanagersystem.model.dto.response.FileDownloadResponse;
 import com.devjoint.librarymanagersystem.model.entity.Author;
 import com.devjoint.librarymanagersystem.model.entity.Book;
 import com.devjoint.librarymanagersystem.model.entity.Category;
@@ -358,7 +359,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public byte[] downloadCover(Long bookId) {
+    public FileDownloadResponse downloadCover(Long bookId) {
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -371,7 +372,6 @@ public class BookServiceImpl implements BookService {
         }
 
         try {
-
             return fileStorageService.getFile(
                     book.getCoverImage()
             );
