@@ -1,24 +1,23 @@
-
 package com.devjoint.librarymanagersystem.controller;
 
 import com.devjoint.librarymanagersystem.model.dto.request.BookRequest;
 import com.devjoint.librarymanagersystem.model.dto.response.BookResponse;
 import com.devjoint.librarymanagersystem.model.dto.response.FileDownloadResponse;
 import com.devjoint.librarymanagersystem.service.BookService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -48,113 +47,284 @@ public class BookController {
                     description = "Unauthorized"
             )
     })
-    public ResponseEntity<BookResponse> createBook(@Valid @RequestBody BookRequest bookRequest) {
-        return new ResponseEntity<>(bookService.createBook(bookRequest), HttpStatus.CREATED);
+    public ResponseEntity<BookResponse> createBook(
+            @Valid @RequestBody BookRequest bookRequest) {
+
+        return new ResponseEntity<>(
+                bookService.createBook(bookRequest),
+                HttpStatus.CREATED
+        );
     }
 
     @GetMapping("/{id}")
     @Operation(
             summary = "Get book by ID",
-            description = "Retrieves a book using its unique ID"
+            description = "Retrieves a book using its unique ID."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Book retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Book retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book not found"
+            )
     })
-    public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.getBookById(id));
+    public ResponseEntity<BookResponse> getBookById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                bookService.getBookById(id)
+        );
     }
 
     @GetMapping
     @Operation(
             summary = "Get all books",
-            description = "Retrieves all books with pagination and sorting support"
+            description = "Retrieves all books with pagination and sorting support."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Books retrieved successfully")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            )
     })
-    public ResponseEntity<Page<BookResponse>> getAllBooks(@ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(bookService.getAllBooks(pageable));
+    public ResponseEntity<Page<BookResponse>> getAllBooks(
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.getAllBooks(pageable)
+        );
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search books by title with pagination and sorting")
-    public ResponseEntity<Page<BookResponse>> searchBooks(@RequestParam String title, @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(bookService.searchBooks(title, pageable));
+    @Operation(
+            summary = "Search books by title",
+            description = "Searches books by title with pagination and sorting support."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books found successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid search parameters"
+            )
+    })
+    public ResponseEntity<Page<BookResponse>> searchBooks(
+            @RequestParam String title,
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.searchBooks(title, pageable)
+        );
     }
 
     @PutMapping("/{id}")
     @Operation(
             summary = "Update a book",
-            description = "Updates an existing book by ID"
+            description = "Updates an existing book by ID."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Book updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Book updated successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book not found"
+            )
     })
-    public ResponseEntity<BookResponse> updateBook(@PathVariable Long id, @Valid @RequestBody BookRequest bookRequest) {
-        return ResponseEntity.ok(bookService.updateBook(id, bookRequest));
+    public ResponseEntity<BookResponse> updateBook(
+            @PathVariable Long id,
+            @Valid @RequestBody BookRequest bookRequest) {
+
+        return ResponseEntity.ok(
+                bookService.updateBook(id, bookRequest)
+        );
     }
 
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Delete a book",
-            description = "Deletes a book by its unique ID"
+            description = "Deletes a book by its unique ID."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Book deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Book deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book not found"
+            )
     })
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBook(
+            @PathVariable Long id) {
+
         bookService.deleteBook(id);
+
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/price-range")
-    @Operation(summary = "Get books by price range")
+    @Operation(
+            summary = "Get books by price range",
+            description = "Retrieves books within the specified minimum and maximum price."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid price range"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> getBooksByPriceRange(
             @RequestParam Double minPrice,
             @RequestParam Double maxPrice,
             @ParameterObject Pageable pageable) {
 
-        return ResponseEntity.ok(bookService.getBooksByPriceRange(minPrice, maxPrice, pageable));
+        return ResponseEntity.ok(
+                bookService.getBooksByPriceRange(
+                        minPrice,
+                        maxPrice,
+                        pageable
+                )
+        );
     }
 
     @GetMapping("/author")
-    @Operation(summary = "Get books by author")
+    @Operation(
+            summary = "Get books by author",
+            description = "Retrieves books matching the specified author name."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid author parameter"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> getBooksByAuthor(
             @RequestParam String authorName,
             @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(bookService.getBooksByAuthor(authorName, pageable));
+
+        return ResponseEntity.ok(
+                bookService.getBooksByAuthor(
+                        authorName,
+                        pageable
+                )
+        );
     }
 
     @GetMapping("/category")
-    @Operation(summary = "Get books by category")
+    @Operation(
+            summary = "Get books by category",
+            description = "Retrieves books matching the specified category."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid category parameter"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> getBooksByCategory(
             @RequestParam String categoryName,
-          @ParameterObject  Pageable pageable) {
-        return ResponseEntity.ok(bookService.getBooksByCategory(categoryName, pageable));
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.getBooksByCategory(
+                        categoryName,
+                        pageable
+                )
+        );
     }
 
     @GetMapping("/jpql")
-    @Operation(summary = "Get books using JPQL query")
+    @Operation(
+            summary = "Get books using JPQL query",
+            description = "Retrieves books with a price greater than the specified value using JPQL."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid price parameter"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThan(
             @RequestParam Double price,
-           @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(bookService.getBooksWithPriceGreaterThan(price, pageable));
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.getBooksWithPriceGreaterThan(
+                        price,
+                        pageable
+                )
+        );
     }
 
     @GetMapping("/native")
-    @Operation(summary = "Get books using native SQL query")
+    @Operation(
+            summary = "Get books using native SQL query",
+            description = "Retrieves books with a price greater than the specified value using a native SQL query."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid price parameter"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> getBooksWithPriceGreaterThanNative(
             @RequestParam Double price,
-           @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(bookService.getBooksWithPriceGreaterThanNative(price, pageable));
+            @ParameterObject Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.getBooksWithPriceGreaterThanNative(
+                        price,
+                        pageable
+                )
+        );
     }
+
     @GetMapping("/filter")
-    @Operation(summary = "Dynamic book filtering")
+    @Operation(
+            summary = "Dynamic book filtering",
+            description = "Filters books by title, author, category and price range with pagination and sorting support."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books filtered successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid filter parameters"
+            )
+    })
     public ResponseEntity<Page<BookResponse>> filterBooks(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
@@ -174,6 +344,7 @@ public class BookController {
                 )
         );
     }
+
     @PostMapping(
             value = "/{id}/cover",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -204,6 +375,7 @@ public class BookController {
                 bookService.uploadCover(id, file)
         );
     }
+
     @GetMapping("/{id}/cover")
     @Operation(
             summary = "Download book cover",
@@ -221,12 +393,14 @@ public class BookController {
     })
     public ResponseEntity<ByteArrayResource> downloadCover(
             @PathVariable Long id) {
+
         FileDownloadResponse file = bookService.downloadCover(id);
+
         ByteArrayResource resource =
                 new ByteArrayResource(file.data());
+
         return ResponseEntity.ok()
                 .contentType(file.contentType())
                 .body(resource);
     }
-
 }
