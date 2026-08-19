@@ -14,9 +14,9 @@ import com.devjoint.librarymanagersystem.service.BookService;
 import com.devjoint.librarymanagersystem.service.FileStorageService;
 import com.devjoint.librarymanagersystem.service.NotificationService;
 import com.devjoint.librarymanagersystem.specification.BookSpecification;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -50,7 +50,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookMapper.toEntity(bookRequest);
         book.setAuthor(author);
 
-        if (bookRequest.getCategoryIds() != null && !bookRequest.getCategoryIds().isEmpty()) {
+        if (bookRequest.getCategoryIds() != null
+                && !bookRequest.getCategoryIds().isEmpty()) {
 
             Set<Category> categories = new HashSet<>(
                     categoryRepository.findAllByIdIn(bookRequest.getCategoryIds())
@@ -60,39 +61,57 @@ public class BookServiceImpl implements BookService {
         }
 
         Book savedBook = bookRepository.save(book);
+
         notificationService.sendNotification(
                 "New book created: " + savedBook.getTitle()
         );
+
         return bookMapper.toResponse(savedBook);
     }
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable("books")
+    @Cacheable(value = "books", key = "#id")
     public BookResponse getBookById(Long id) {
+
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Book not found with id: " + id));
+
         return bookMapper.toResponse(book);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "books",
+            key = "'all:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
     public Page<BookResponse> getAllBooks(Pageable pageable) {
+
         return bookRepository.findAll(pageable)
                 .map(bookMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> searchBooks(String title, Pageable pageable) {
+    @Cacheable(
+            value = "books",
+            key = "'search:' + #title + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> searchBooks(
+            String title,
+            Pageable pageable) {
+
         return bookRepository.findByTitleContainingIgnoreCase(title, pageable)
                 .map(bookMapper::toResponse);
     }
+
     @Transactional
     @CacheEvict(value = "books", key = "#id")
     @Override
     public BookResponse updateBook(Long id, BookRequest bookRequest) {
+
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Book not found with id: " + id));
@@ -105,18 +124,22 @@ public class BookServiceImpl implements BookService {
 
         existingBook.setAuthor(author);
 
-        if (bookRequest.getCategoryIds() != null && !bookRequest.getCategoryIds().isEmpty()) {
+        if (bookRequest.getCategoryIds() != null
+                && !bookRequest.getCategoryIds().isEmpty()) {
 
             Set<Category> categories = new HashSet<>(
                     categoryRepository.findAllByIdIn(bookRequest.getCategoryIds())
             );
 
             existingBook.setCategories(categories);
+
         } else {
             existingBook.getCategories().clear();
         }
 
-        return bookMapper.toResponse(bookRepository.save(existingBook));
+        return bookMapper.toResponse(
+                bookRepository.save(existingBook)
+        );
     }
 
     @CacheEvict(value = "books", key = "#id")
@@ -129,42 +152,104 @@ public class BookServiceImpl implements BookService {
 
         bookRepository.delete(book);
     }
+
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> getBooksByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
-        return bookRepository.findByPriceBetween(minPrice, maxPrice, pageable)
+    @Cacheable(
+            value = "books",
+            key = "'price:' + #minPrice + ':' + #maxPrice + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> getBooksByPriceRange(
+            Double minPrice,
+            Double maxPrice,
+            Pageable pageable) {
+
+        return bookRepository.findByPriceBetween(
+                        minPrice,
+                        maxPrice,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> getBooksByAuthor(String authorName, Pageable pageable) {
-        return bookRepository.findByAuthorFullNameContainingIgnoreCase(authorName, pageable)
+    @Cacheable(
+            value = "books",
+            key = "'author:' + #authorName + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> getBooksByAuthor(
+            String authorName,
+            Pageable pageable) {
+
+        return bookRepository
+                .findByAuthorFullNameContainingIgnoreCase(
+                        authorName,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
-        return bookRepository.findByCategoriesNameIgnoreCase(categoryName, pageable)
+    @Cacheable(
+            value = "books",
+            key = "'category:' + #categoryName + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> getBooksByCategory(
+            String categoryName,
+            Pageable pageable) {
+
+        return bookRepository
+                .findByCategoriesNameIgnoreCase(
+                        categoryName,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> getBooksWithPriceGreaterThan(Double price, Pageable pageable) {
-        return bookRepository.findBooksWithPriceGreaterThan(price, pageable)
+    @Cacheable(
+            value = "books",
+            key = "'greaterThan:' + #price + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> getBooksWithPriceGreaterThan(
+            Double price,
+            Pageable pageable) {
+
+        return bookRepository
+                .findBooksWithPriceGreaterThan(
+                        price,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookResponse> getBooksWithPriceGreaterThanNative(Double price, Pageable pageable) {
-        return bookRepository.findBooksWithPriceGreaterThanNative(price, pageable)
+    @Cacheable(
+            value = "books",
+            key = "'greaterThanNative:' + #price + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
+    public Page<BookResponse> getBooksWithPriceGreaterThanNative(
+            Double price,
+            Pageable pageable) {
+
+        return bookRepository
+                .findBooksWithPriceGreaterThanNative(
+                        price,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
+
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "books",
+            key = "'filter:' + #title + ':' + #author + ':' + #category + ':' + #minPrice + ':' + #maxPrice + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort"
+    )
     public Page<BookResponse> filterBooks(
             String title,
             String author,
@@ -177,11 +262,18 @@ public class BookServiceImpl implements BookService {
                 .where(BookSpecification.hasTitle(title))
                 .and(BookSpecification.hasAuthor(author))
                 .and(BookSpecification.hasCategory(category))
-                .and(BookSpecification.hasPriceBetween(minPrice, maxPrice));
+                .and(BookSpecification.hasPriceBetween(
+                        minPrice,
+                        maxPrice
+                ));
 
-        return bookRepository.findAll(specification, pageable)
+        return bookRepository.findAll(
+                        specification,
+                        pageable
+                )
                 .map(bookMapper::toResponse);
     }
+
     @Transactional
     @Override
     public void createBookAndFail(BookRequest bookRequest) {
@@ -193,10 +285,15 @@ public class BookServiceImpl implements BookService {
         Book book = bookMapper.toEntity(bookRequest);
         book.setAuthor(author);
 
-        if (bookRequest.getCategoryIds() != null && !bookRequest.getCategoryIds().isEmpty()) {
+        if (bookRequest.getCategoryIds() != null
+                && !bookRequest.getCategoryIds().isEmpty()) {
+
             Set<Category> categories = new HashSet<>(
-                    categoryRepository.findAllByIdIn(bookRequest.getCategoryIds())
+                    categoryRepository.findAllByIdIn(
+                            bookRequest.getCategoryIds()
+                    )
             );
+
             book.setCategories(categories);
         }
 
@@ -204,21 +301,27 @@ public class BookServiceImpl implements BookService {
 
         throw new RuntimeException("Rollback test");
     }
+
     @Override
     @Transactional
-    public String uploadCover(Long bookId, MultipartFile file) {
+    public String uploadCover(
+            Long bookId,
+            MultipartFile file) {
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Book not found with id: " + bookId));
 
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("File cannot be empty");
+            throw new IllegalArgumentException(
+                    "File cannot be empty"
+            );
         }
 
         if (file.getSize() > 5 * 1024 * 1024) {
             throw new IllegalArgumentException(
-                    "File size must not exceed 5 MB");
+                    "File size must not exceed 5 MB"
+            );
         }
 
         String contentType = file.getContentType();
@@ -227,22 +330,30 @@ public class BookServiceImpl implements BookService {
                 "image/jpeg",
                 "image/png"
         ).contains(contentType)) {
+
             throw new IllegalArgumentException(
-                    "Only JPG, JPEG and PNG files are allowed");
+                    "Only JPG, JPEG and PNG files are allowed"
+            );
         }
 
         try {
+
             String fileName = fileStorageService.saveFile(file);
 
             book.setCoverImage(fileName);
+
             bookRepository.save(book);
 
             return fileName;
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save cover image", e);
+            throw new RuntimeException(
+                    "Failed to save cover image",
+                    e
+            );
         }
     }
+
     @Override
     @Transactional(readOnly = true)
     public byte[] downloadCover(Long bookId) {
@@ -253,15 +364,21 @@ public class BookServiceImpl implements BookService {
 
         if (book.getCoverImage() == null) {
             throw new ResourceNotFoundException(
-                    "Cover image not found for book id: " + bookId);
+                    "Cover image not found for book id: " + bookId
+            );
         }
 
         try {
-            return fileStorageService.getFile(book.getCoverImage());
+
+            return fileStorageService.getFile(
+                    book.getCoverImage()
+            );
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read cover image", e);
+            throw new RuntimeException(
+                    "Failed to read cover image",
+                    e
+            );
         }
     }
-
 }
