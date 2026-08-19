@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
-    @Async
+    @Async("taskExecutor")
     @Override
     public void sendNotification(String message) {
         log.info("Async notification started: {}", message);
