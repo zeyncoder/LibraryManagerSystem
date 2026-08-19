@@ -39,6 +39,8 @@ public class BookServiceImpl implements BookService {
     private final FileStorageService fileStorageService;
     private final NotificationService notificationService;
 
+
+    @CacheEvict(value = "books", allEntries = true)
     @Transactional
     @Override
     public BookResponse createBook(BookRequest bookRequest) {
@@ -108,7 +110,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional
-    @CacheEvict(value = "books", key = "#id")
+    @CacheEvict(value = "books", allEntries = true)
     @Override
     public BookResponse updateBook(Long id, BookRequest bookRequest) {
 
@@ -142,7 +144,7 @@ public class BookServiceImpl implements BookService {
         );
     }
 
-    @CacheEvict(value = "books", key = "#id")
+    @CacheEvict(value = "books", allEntries = true)
     @Override
     public void deleteBook(Long id) {
 
